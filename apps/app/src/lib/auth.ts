@@ -8,10 +8,19 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.TODOIST_SECRET || "",
     }),
   ],
+  pages: {
+    signIn: "/signin",
+  },
   callbacks: {
-    async session({ session, user, token }) {
-      console.log(token);
+    async session({ session, token }) {
+      session.access_token = token.access_token as string;
       return session;
+    },
+    async jwt({ token, account }) {
+      if (account?.access_token) {
+        token.access_token = account.access_token as string;
+      }
+      return token;
     },
   },
 };
