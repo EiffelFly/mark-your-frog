@@ -1,4 +1,4 @@
-export * from "./MarkYourFrogButton";
+export * from "./MarkYourFrog";
 export * from "./NavBar";
 export * from "./SignInButton";
 export * from "./SignOutButton";
