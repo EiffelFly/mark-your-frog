@@ -3,7 +3,11 @@
 
 
 
+## Caveat
 
+### TypeError: adapter is not a function
+
+This is an Axios error, because the worker is using an edge runtime. It doesn't support NODE API.
 
 
 ## Reference
