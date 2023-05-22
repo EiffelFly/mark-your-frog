@@ -12,7 +12,9 @@ export const MarkYourFrog = (props: MarkYourFrogProps) => {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleAnalyse = useCallback(async () => {
-		const res = await trpc.todoist.hello.query("hello world");
+		const res = await trpc.todoist.analyse.query({
+			accessToken,
+		});
 		console.log(res);
 	}, []);
 
