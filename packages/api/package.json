@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler publish",
-    "dev": "wrangler dev --remote"
+    "dev": "wrangler dev --remote --log-level=debug"
   },
   "dependencies": {
     "@doist/todoist-api-typescript": "^2.1.2",
