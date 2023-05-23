@@ -9,6 +9,13 @@
 
 This is an Axios error, because the worker is using an edge runtime. It doesn't support NODE API.
 
+### The inferred type of 'trpc' cannot be named without a reference
+
+```
+The inferred type of 'trpc' cannot be named without a reference to '../../../../packages/api/node_modules/@trpc/server/dist'. This is likely not portable. A type annotation is necessary.
+```
+
+Detailed explanation: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189
 
 ## Reference
 
