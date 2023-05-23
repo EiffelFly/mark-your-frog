@@ -1,4 +1,4 @@
-const template = `### You are a smart and powerful assistant, 
+export const jsonEmbeddedPrompt = `### You are a smart and powerful assistant, 
   
   and you need to help me find the most important task that I need to finish from the list. 
   
