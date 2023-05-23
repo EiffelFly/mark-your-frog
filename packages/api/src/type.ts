@@ -29,25 +29,29 @@ export const TodoistTodoSchema = z.object({
 export type TodoistTodo = z.infer<typeof TodoistTodoSchema>;
 
 export const simplifiedTodoistTodoSchema = z.object({
-	id: z.string(),
-	content: z.string(),
-	description: z.string(),
-	priority: z.number(),
-	url: z.string(),
-	due: z.object({
-		date: z.string(),
-		is_recurring: z.boolean(),
-		datetime: z.string(),
-		string: z.string(),
-		timezone: z.string(),
-	}),
+	id: z.string().describe("The id of the todoist todo"),
+	content: z.string().describe("The content of the todoist todo"),
+	description: z.string().describe("The description of the todoist todo"),
+	priority: z.number().describe("The priority of the todoist todo"),
+	url: z.string().describe("The url of the todoist todo"),
+	due: z
+		.object({
+			date: z.string().describe("The due date of the todoist todo like 2023-05-20"),
+			string: z.string().describe("The due date of the todoist todo like 5月21日"),
+			datetime: z.string().describe("The due date of the todoist todo like tw"),
+			is_recurring: z.boolean().describe("Whether this is the recurring task or not"),
+			timezone: z.string().describe("The timezone of the todoist todo"),
+		})
+		.describe("The due date object of the todoist todo"),
 });
 
 export type SimplifiedTodoistTodo = z.infer<typeof simplifiedTodoistTodoSchema>;
 
 export const todoistFrogSchema = z.object({
 	frog: simplifiedTodoistTodoSchema,
-	reason: z.string(),
+	reason: z
+		.string()
+		.describe("The reason why you think this is the most important task in 200 words"),
 });
 
 export type TodoistFrog = z.infer<typeof todoistFrogSchema>;

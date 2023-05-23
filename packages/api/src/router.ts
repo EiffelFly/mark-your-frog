@@ -61,29 +61,7 @@ const todoistRouter = router({
 
 				INPUT: {todos}`;
 
-				const desiredStructureParser = StructuredOutputParser.fromZodSchema(
-					z.object({
-						todo: z.object({
-							id: z.number().nullable().describe("The id of the todoist todo"),
-							content: z.string().describe("The content of the todoist todo"),
-							priority: z.number().describe("The priority of the todoist todo"),
-							due: z
-								.object({
-									date: z.string().describe("The due date of the todoist todo like 2023-05-20"),
-									string: z.string().describe("The due date of the todoist todo like 5月21日"),
-									lang: z.string().describe("The due date of the todoist todo like tw"),
-									isRecurring: z.boolean().describe("Whether this is the recurring task or not"),
-									timezone: z.string().describe("The timezone of the todoist todo"),
-								})
-								.describe("The due date object of the todoist todo"),
-							description: z.string().describe("The description of the todoist todo"),
-							url: z.string().describe("The url of the todoist todo"),
-						}),
-						reason: z
-							.string()
-							.describe("The reason why you think this is the most important task in 200 words"),
-					})
-				);
+				const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
 
 				const prompt = new PromptTemplate({
 					template: zodObjectTemplate,
@@ -101,9 +79,9 @@ const todoistRouter = router({
 				const chain = new LLMChain({ llm: model, prompt });
 
 				// Begin to generation analyse
-
 				const res = await chain.call({ todos: JSON.stringify(todos) });
 				const frog = JSON.parse(res.text) as TodoistFrog;
+
 				return Promise.resolve(frog);
 			} catch (err) {
 				console.log(err);
