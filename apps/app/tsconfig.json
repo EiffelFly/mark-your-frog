@@ -16,7 +16,7 @@
     "strict": true,
 
     // https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189
-    "declaration": true
+    "declaration": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

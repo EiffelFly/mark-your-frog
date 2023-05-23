@@ -37,3 +37,6 @@ dist/
 
 # cloudflare workder
 .dev.vars
+
+# Firebase
+mark-your-frog-firebase-key.json
