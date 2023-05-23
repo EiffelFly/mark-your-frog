@@ -1,5 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { AppRouter } from "../../../../packages/api/src/router";
+import { AppRouter } from "@mark-your-frog/api";
 
 export const trpc = createTRPCProxyClient<AppRouter>({
 	links: [
