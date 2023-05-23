@@ -1,7 +1,9 @@
 {
-  "name": "weathered-pond-8621",
+  "name": "@mark-your-frog/api",
   "version": "0.0.0",
   "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "deploy": "wrangler publish",
     "dev": "wrangler dev --remote --log-level=debug"
