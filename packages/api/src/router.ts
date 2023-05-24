@@ -5,6 +5,11 @@ import { OpenAI } from "langchain/llms/openai";
 import { StructuredOutputParser } from "langchain/output_parsers";
 import { createContext } from "./worker";
 import { SimplifiedTodoistTodo, TodoistFrog, TodoistTodo, todoistFrogSchema } from "./type";
+import { init, Tiktoken } from "tiktoken/lite/init";
+import wasm from "../node_modules/tiktoken/lite/tiktoken_bg.wasm";
+import cl100k from "tiktoken/encoders/cl100k_base.json";
+import { chunkArray } from "./utils";
+import { mockFrog } from "./mock";
 
 const t = initTRPC.context<typeof createContext>().create();
 
@@ -45,44 +50,80 @@ const todoistRouter = router({
 						url: e.url,
 					}));
 
-				console.log(todos);
+				// Initialize tiktoken
+				await init((imports) => WebAssembly.instantiate(wasm, imports));
+				const encoder = new Tiktoken(cl100k.bpe_ranks, cl100k.special_tokens, cl100k.pat_str);
 
-				const zodObjectTemplate = `### You are a smart and powerful assistant,
+				const todoChunks = chunkArray(todos, 10);
+				const initialChunkCounts = todoChunks.length;
+				let saintTodoChunks: SimplifiedTodoistTodo[][] = [];
 
-				and you need to help me find the most important task that I need to finish from the list.
+				for (let i = 0; i < todoChunks.length; i++) {
+					let chunkExceedsLimit = true;
 
-				In order to make the answer precise, let's think step by step, but you don't need to include your
+					while (chunkExceedsLimit) {
+						const chunkToken = encoder.encode(JSON.stringify(todoChunks[i]));
+						if (chunkToken.length < 2048) {
+							chunkExceedsLimit = false;
+							saintTodoChunks.push(todoChunks[i]);
+							break;
+						} else {
+							const popedTodo = todoChunks[i].pop();
+							if (popedTodo) {
+								if (todoChunks.length === initialChunkCounts + 1) {
+									todoChunks.push([popedTodo]);
+								} else {
+									todoChunks[todoChunks.length - 1].push(popedTodo);
+								}
+							}
+						}
+					}
+				}
 
-				reasoning in the answer. But try to fill in the below format ###
+				encoder.free();
 
-				Desired format {format_instructions}
+				console.log(saintTodoChunks);
 
-				The reason of this chosen task should be concise and logical, it should be 100 words or less.
+				// encoder.free();
 
-				INPUT: {todos}`;
+				// console.log(todos);
 
-				const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
+				// const zodObjectTemplate = `### You are a smart and powerful assistant,
 
-				const prompt = new PromptTemplate({
-					template: zodObjectTemplate,
-					inputVariables: ["todos"],
-					partialVariables: {
-						format_instructions: desiredStructureParser.getFormatInstructions(),
-					},
-				});
+				// and you need to help me find the most important task that I need to finish from the list.
 
-				const model = new OpenAI({
-					temperature: 0.1,
-					modelName: "gpt-3.5-turbo",
-					openAIApiKey: ctx.OPEN_API_KEY,
-				});
-				const chain = new LLMChain({ llm: model, prompt });
+				// In order to make the answer precise, let's think step by step, but you don't need to include your
 
-				// Begin to generation analyse
-				const res = await chain.call({ todos: JSON.stringify(todos) });
-				const frog = JSON.parse(res.text) as TodoistFrog;
+				// reasoning in the answer. But try to fill in the below format ###
 
-				return Promise.resolve(frog);
+				// Desired format {format_instructions}
+
+				// The reason of this chosen task should be concise and logical, it should be 100 words or less.
+
+				// INPUT: {todos}`;
+
+				// const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
+
+				// const prompt = new PromptTemplate({
+				// 	template: zodObjectTemplate,
+				// 	inputVariables: ["todos"],
+				// 	partialVariables: {
+				// 		format_instructions: desiredStructureParser.getFormatInstructions(),
+				// 	},
+				// });
+
+				// const model = new OpenAI({
+				// 	temperature: 0.1,
+				// 	modelName: "gpt-3.5-turbo",
+				// 	openAIApiKey: ctx.OPEN_API_KEY,
+				// });
+				// const chain = new LLMChain({ llm: model, prompt });
+
+				// // Begin to generation analyse
+				// const res = await chain.call({ todos: JSON.stringify(todos) });
+				// const frog = JSON.parse(res.text) as TodoistFrog;
+
+				return Promise.resolve(mockFrog);
 			} catch (err) {
 				console.log(err);
 				return Promise.reject(err);

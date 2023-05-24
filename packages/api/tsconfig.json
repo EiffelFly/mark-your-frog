@@ -5,7 +5,8 @@
     "module": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "strict": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": ["@cloudflare/workers-types"],
+    "resolveJsonModule": true
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]

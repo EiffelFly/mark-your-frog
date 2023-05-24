@@ -13,15 +13,16 @@
     "@trpc/client": "^10.27.1",
     "@trpc/server": "^10.27.1",
     "langchain": "^0.0.78",
+    "tiktoken": "^1.0.7",
     "zod": "^3.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230419.0",
-    "itty-router": "^3.0.12",
-    "typescript": "^5.0.4",
-    "wrangler": "^3.0.0",
     "eslint": "^8.40.0",
     "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*"
+    "itty-router": "^3.0.12",
+    "tsconfig": "workspace:*",
+    "typescript": "^5.0.4",
+    "wrangler": "^3.0.0"
   }
 }
