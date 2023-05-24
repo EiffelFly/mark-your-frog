@@ -16,7 +16,9 @@ export default async function Home() {
 				<h1 className="mb-20 text-center text-6xl font-extrabold tracking-tight text-white sm:text-7xl lg:text-8xl xl:text-8xl">
 					Mark your Frog
 				</h1>
-				{session?.access_token ? <MarkYourFrog accessToken={session.access_token} /> : null}
+				{session && session.access_token ? (
+					<MarkYourFrog accessToken={session.access_token} />
+				) : null}
 			</div>
 		</div>
 	);

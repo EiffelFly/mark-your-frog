@@ -13,15 +13,15 @@ export const authOptions: NextAuthOptions = {
 	pages: {
 		signIn: "/signin",
 	},
+	session: { strategy: "jwt" },
 	callbacks: {
 		async session({ session, token }) {
 			session.access_token = token.access_token as string;
 			return session;
 		},
 		async jwt({ token, account }) {
-			console.log(token);
-			if (account?.access_token) {
-				token.access_token = account.access_token as string;
+			if (account && account.access_token) {
+				token.access_token = account.access_token;
 			}
 			return token;
 		},

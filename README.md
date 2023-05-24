@@ -17,6 +17,17 @@ The inferred type of 'trpc' cannot be named without a reference to '../../../../
 
 Detailed explanation: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189
 
+### Next-Auth jwt callback is not triggered
+
+Make sure your next-auth configuration has this line
+
+```ts
+{
+  session: { strategy: "jwt" },
+}
+```
+
+
 ## Reference
 
 - [Building a GPT-3 app with Next.js and Vercel Edge Functions](https://vercel.com/blog/gpt-3-app-next-js-vercel-edge-functions)
