@@ -6,6 +6,7 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 
 import { chunkArray } from "./utils";
 import { LLMChain, OpenAI, PromptTemplate } from "langchain";
+import { zodObjectTemplate } from "./prompt";
 
 const t = initTRPC.context<typeof createContext>().create();
 
@@ -85,20 +86,6 @@ const todoistRouter = router({
 				// encoder.free();
 
 				// console.log(todos);
-
-				const zodObjectTemplate = `### You are a smart and powerful assistant,
-
-				and you need to help me find the most important task that I need to finish from the list.
-
-				In order to make the answer precise, let's think step by step, but you don't need to include your
-
-				reasoning in the answer. But try to fill in the below format ###
-
-				Desired format {format_instructions}
-
-				The reason of this chosen task should be concise and logical, it should be 100 words or less.
-
-				INPUT: {todos}`;
 
 				const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
 
