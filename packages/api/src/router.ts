@@ -1,15 +1,11 @@
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
-import { LLMChain, PromptTemplate } from "langchain";
-import { OpenAI } from "langchain/llms/openai";
-import { StructuredOutputParser } from "langchain/output_parsers";
 import { createContext } from "./worker";
 import { SimplifiedTodoistTodo, TodoistFrog, TodoistTodo, todoistFrogSchema } from "./type";
-import { init, Tiktoken } from "tiktoken/lite/init";
-import wasm from "../node_modules/tiktoken/lite/tiktoken_bg.wasm";
-import cl100k from "tiktoken/encoders/cl100k_base.json";
+import { StructuredOutputParser } from "langchain/output_parsers";
+
 import { chunkArray } from "./utils";
-import { mockFrog } from "./mock";
+import { LLMChain, OpenAI, PromptTemplate } from "langchain";
 
 const t = initTRPC.context<typeof createContext>().create();
 
@@ -51,79 +47,90 @@ const todoistRouter = router({
 					}));
 
 				// Initialize tiktoken
-				await init((imports) => WebAssembly.instantiate(wasm, imports));
-				const encoder = new Tiktoken(cl100k.bpe_ranks, cl100k.special_tokens, cl100k.pat_str);
+				// await init((imports) => WebAssembly.instantiate(wasm, imports));
+				// const encoder = new Tiktoken(cl100k.bpe_ranks, cl100k.special_tokens, cl100k.pat_str);
+
+				// const encoding = new Tiktoken(cl100k.bpe_ranks, cl100k.special_tokens, cl100k.pat_str);
 
 				const todoChunks = chunkArray(todos, 10);
-				const initialChunkCounts = todoChunks.length;
-				let saintTodoChunks: SimplifiedTodoistTodo[][] = [];
+				// const initialChunkCounts = todoChunks.length;
+				// let saintTodoChunks: SimplifiedTodoistTodo[][] = [];
 
-				for (let i = 0; i < todoChunks.length; i++) {
-					let chunkExceedsLimit = true;
+				// for (let i = 0; i < todoChunks.length; i++) {
+				// 	let chunkExceedsLimit = true;
 
-					while (chunkExceedsLimit) {
-						const chunkToken = encoder.encode(JSON.stringify(todoChunks[i]));
-						if (chunkToken.length < 2048) {
-							chunkExceedsLimit = false;
-							saintTodoChunks.push(todoChunks[i]);
-							break;
-						} else {
-							const popedTodo = todoChunks[i].pop();
-							if (popedTodo) {
-								if (todoChunks.length === initialChunkCounts + 1) {
-									todoChunks.push([popedTodo]);
-								} else {
-									todoChunks[todoChunks.length - 1].push(popedTodo);
-								}
-							}
-						}
-					}
-				}
+				// 	while (chunkExceedsLimit) {
+				// 		const chunkToken = encoder.encode(JSON.stringify(todoChunks[i]));
+				// 		if (chunkToken.length < 2048) {
+				// 			chunkExceedsLimit = false;
+				// 			saintTodoChunks.push(todoChunks[i]);
+				// 			break;
+				// 		} else {
+				// 			const popedTodo = todoChunks[i].pop();
+				// 			if (popedTodo) {
+				// 				if (todoChunks.length === initialChunkCounts + 1) {
+				// 					todoChunks.push([popedTodo]);
+				// 				} else {
+				// 					todoChunks[todoChunks.length - 1].push(popedTodo);
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// }
 
-				encoder.free();
+				// encoder.free();
 
-				console.log(saintTodoChunks);
+				// console.log(saintTodoChunks);
 
 				// encoder.free();
 
 				// console.log(todos);
 
-				// const zodObjectTemplate = `### You are a smart and powerful assistant,
+				const zodObjectTemplate = `### You are a smart and powerful assistant,
 
-				// and you need to help me find the most important task that I need to finish from the list.
+				and you need to help me find the most important task that I need to finish from the list.
 
-				// In order to make the answer precise, let's think step by step, but you don't need to include your
+				In order to make the answer precise, let's think step by step, but you don't need to include your
 
-				// reasoning in the answer. But try to fill in the below format ###
+				reasoning in the answer. But try to fill in the below format ###
 
-				// Desired format {format_instructions}
+				Desired format {format_instructions}
 
-				// The reason of this chosen task should be concise and logical, it should be 100 words or less.
+				The reason of this chosen task should be concise and logical, it should be 100 words or less.
 
-				// INPUT: {todos}`;
+				INPUT: {todos}`;
 
-				// const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
+				const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
 
-				// const prompt = new PromptTemplate({
-				// 	template: zodObjectTemplate,
-				// 	inputVariables: ["todos"],
-				// 	partialVariables: {
-				// 		format_instructions: desiredStructureParser.getFormatInstructions(),
-				// 	},
-				// });
+				const prompt = new PromptTemplate({
+					template: zodObjectTemplate,
+					inputVariables: ["todos"],
+					partialVariables: {
+						format_instructions: desiredStructureParser.getFormatInstructions(),
+					},
+				});
 
-				// const model = new OpenAI({
-				// 	temperature: 0.1,
-				// 	modelName: "gpt-3.5-turbo",
-				// 	openAIApiKey: ctx.OPEN_API_KEY,
-				// });
-				// const chain = new LLMChain({ llm: model, prompt });
+				const model = new OpenAI({
+					temperature: 0.1,
+					modelName: "gpt-3.5-turbo",
+					openAIApiKey: ctx.OPEN_API_KEY,
+				});
+				const chain = new LLMChain({ llm: model, prompt });
+
+				let stepResult: TodoistFrog | null = null;
 
 				// // Begin to generation analyse
-				// const res = await chain.call({ todos: JSON.stringify(todos) });
-				// const frog = JSON.parse(res.text) as TodoistFrog;
+				for (let i = 0; i < todoChunks.length; i++) {
+					let _todoChunk = stepResult ? todoChunks[i].push(stepResult.frog) : todoChunks[i];
+					const res = await chain.call({ todos: JSON.stringify(_todoChunk) });
+					stepResult = JSON.parse(res.text) as TodoistFrog;
+				}
 
-				return Promise.resolve(mockFrog);
+				if (!stepResult) {
+					throw new Error("Something went wrong when processing the frog");
+				}
+
+				return Promise.resolve(stepResult);
 			} catch (err) {
 				console.log(err);
 				return Promise.reject(err);
