@@ -24,7 +24,7 @@ export async function chunkArrayByTokenLimit<T>(array: T[], model: OpenAI, token
 		tokenCounts.push(elementTokens);
 	}
 
-	for (const [i, element] of array.entries()) {
+	for (let i = 0; i < array.length; i++) {
 		const elementTokens = tokenCounts[i];
 
 		if (elementTokens + currentChunkTokens > tokenLimit) {
@@ -34,7 +34,7 @@ export async function chunkArrayByTokenLimit<T>(array: T[], model: OpenAI, token
 			currentChunkTokens = 0;
 		}
 
-		currentChunk.push(element);
+		currentChunk.push(array[i]);
 		currentChunkTokens += elementTokens;
 	}
 

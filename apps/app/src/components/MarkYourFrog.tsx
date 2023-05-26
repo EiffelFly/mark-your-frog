@@ -28,7 +28,7 @@ export const MarkYourFrog = (props: MarkYourFrogProps) => {
 			console.log(err);
 			setIsLoading(false);
 		}
-	}, []);
+	}, [accessToken]);
 
 	return (
 		<div className="flex flex-col gap-y-12">
