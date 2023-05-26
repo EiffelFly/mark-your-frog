@@ -4,12 +4,11 @@ import { createContext } from "./worker";
 import { SimplifiedTodoistTodo, TodoistFrog, TodoistTodo, todoistFrogSchema } from "./type";
 import { StructuredOutputParser } from "langchain/output_parsers";
 
-import { chunkArray } from "./utils";
+import { chunkArrayByTokenLimit } from "./utils";
 import { LLMChain, OpenAI, PromptTemplate } from "langchain";
 import { zodObjectTemplate } from "./prompt";
 
 const t = initTRPC.context<typeof createContext>().create();
-
 const publicProcedure = t.procedure;
 const router = t.router;
 
@@ -53,39 +52,20 @@ const todoistRouter = router({
 
 				// const encoding = new Tiktoken(cl100k.bpe_ranks, cl100k.special_tokens, cl100k.pat_str);
 
-				const todoChunks = chunkArray(todos, 10);
-				// const initialChunkCounts = todoChunks.length;
-				// let saintTodoChunks: SimplifiedTodoistTodo[][] = [];
+				const model = new OpenAI({
+					temperature: 0.1,
+					modelName: "gpt-3.5-turbo",
+					openAIApiKey: ctx.OPEN_API_KEY,
+				});
 
-				// for (let i = 0; i < todoChunks.length; i++) {
-				// 	let chunkExceedsLimit = true;
+				const totalTodoSize = await model.getNumTokens(JSON.stringify(todos));
+				let saintTodos: SimplifiedTodoistTodo[][] = [];
 
-				// 	while (chunkExceedsLimit) {
-				// 		const chunkToken = encoder.encode(JSON.stringify(todoChunks[i]));
-				// 		if (chunkToken.length < 2048) {
-				// 			chunkExceedsLimit = false;
-				// 			saintTodoChunks.push(todoChunks[i]);
-				// 			break;
-				// 		} else {
-				// 			const popedTodo = todoChunks[i].pop();
-				// 			if (popedTodo) {
-				// 				if (todoChunks.length === initialChunkCounts + 1) {
-				// 					todoChunks.push([popedTodo]);
-				// 				} else {
-				// 					todoChunks[todoChunks.length - 1].push(popedTodo);
-				// 				}
-				// 			}
-				// 		}
-				// 	}
-				// }
-
-				// encoder.free();
-
-				// console.log(saintTodoChunks);
-
-				// encoder.free();
-
-				// console.log(todos);
+				if (totalTodoSize < 2048) {
+					saintTodos = [[...todos]];
+				} else {
+					saintTodos = await chunkArrayByTokenLimit(todos, model, 3072);
+				}
 
 				const desiredStructureParser = StructuredOutputParser.fromZodSchema(todoistFrogSchema);
 
@@ -97,18 +77,13 @@ const todoistRouter = router({
 					},
 				});
 
-				const model = new OpenAI({
-					temperature: 0.1,
-					modelName: "gpt-3.5-turbo",
-					openAIApiKey: ctx.OPEN_API_KEY,
-				});
 				const chain = new LLMChain({ llm: model, prompt });
 
 				let stepResult: TodoistFrog | null = null;
 
-				// // Begin to generation analyse
-				for (let i = 0; i < todoChunks.length; i++) {
-					let _todoChunk = stepResult ? todoChunks[i].push(stepResult.frog) : todoChunks[i];
+				// Begin to generation analyse
+				for (let i = 0; i < saintTodos.length; i++) {
+					let _todoChunk = stepResult ? saintTodos[i].push(stepResult.frog) : saintTodos[i];
 					const res = await chain.call({ todos: JSON.stringify(_todoChunk) });
 					stepResult = JSON.parse(res.text) as TodoistFrog;
 				}
