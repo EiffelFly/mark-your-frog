@@ -1,7 +1,46 @@
-## Mark your frog
+# Mark your frog
 
+Eat the frog is a useful and popular method to help you get things done. [^1] In short, in every morning you have to identify **one** important task and do it first. This task is your frog. When to todo list is small, it's quite easy to identify your frog but when you have a large todo list, it becomes harder to identify frog.
 
+So we are here with gpt-3.5-turbo model to help you identify your frog.
 
+## Prompt
+
+```
+### 
+
+You are a smart and powerful assistant,
+
+and you need to help me find the most important task that I need to finish from the list. 
+
+###
+
+Desired format {format_instructions}
+
+The reason of this chosen task should be concise and logical, it should be 100 words or less.
+
+INPUT: {todos}
+```
+
+## Technological details
+
+- Nextjs app folder structure to build our simple frontend
+- Next-Auth with todoist oauth provider to authenticate user and acquire todoist access token
+- tRPC to bridge frontend and backend
+- Langchain.js to generate prompt
+- cloudflare worker to host the backend 
+
+### Notably details
+
+- In order to precisely chunk the todo list we have to get the token size, at the first glance we are using [dqbd/tiktoken](https://github.com/dqbd/tiktoken) but the wasm bundle is broken at cloudflare worker. But then I discovered that we can utilize langchain.js get the token size. (They are using the pure js version of dqbd/tiktoken called "js-tiktoken" under the hood). You could find the explanation of the author here [^2]
+- You could use `StructuredOutputParser.fromZodSchema()` to generate schema parser for the prompt. This is very useful to indicate model that it should give back a valid json object. We are also using the same schema to validate the tRPC response.
+
+## Future plan
+
+- We are planning to expand the functionality of this project into several direction
+  - Chain different provider like Slack, Linear, Asena to help people priortize their task
+- Add functionality to spilt the frog into different tasks.
+- Calculate the time needed to finish the task and help people to plan their day.
 
 ## Caveat
 
@@ -88,3 +127,7 @@ You need to copy this line and then directly paste into Vercel. Vercel will auto
 - [supabase-community/nextjs-openai-doc-search](https://github.com/supabase-community/nextjs-openai-doc-search/)
 - [dair-ai/Prompt-Engineering-Guide](https://github.com/dair-ai/Prompt-Engineering-Guide)
 - [LangChain101: Question A 300 Page Book (w/ OpenAI + Pinecone)](https://www.youtube.com/watch?v=h0DHDp1FbmQ)
+
+
+[^1]: [Todoist/Eat the frog](https://todoist.com/productivity-methods/eat-the-frog)
+[^2]: [Cloudflare worker Uncaught ReferenceError: FinalizationRegistry is not defined](https://github.com/dqbd/tiktoken/issues/46)
