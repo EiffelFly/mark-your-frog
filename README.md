@@ -75,18 +75,10 @@ I begin to dig into how to solve this problem. I found that the problem is cause
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY.........-----END PRIVATE KEY-----\n"
 ```
 
-In this way, we need to apply some escape rule to correctly parse the secret. You need to do something like this
+You need to copy this line and then directly paste into Vercel. Vercel will automatically replace newline.
 
-```ts
-// root/.env.local
 
-FIREBASE_PRIVATE_KEY='{"privateKey":"-----BEGIN PRIVATE KEY.........-----END PRIVATE KEY-----\n"}'
-
-// lib/auth.ts
-const { privateKey } = JSON.parse(process.env.GOOGLE_PRIVATE_KEY || '{ privateKey: null }')
-```
-
-- [Vercel/Storing complex secrets](https://github.com/vercel/vercel/issues/749#issuecomment-715009494)
+- [Vercel/Storing complex secrets](https://github.com/vercel/vercel/issues/749#issuecomment-1323978876)
 
 
 ## Reference
