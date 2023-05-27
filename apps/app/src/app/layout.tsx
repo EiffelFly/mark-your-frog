@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import { NavBar } from "@/components";
+import { Footer } from "@/components/Footer";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 // include styles from the ui package
@@ -13,6 +14,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 				<div className="flex min-h-screen flex-col">
 					<NavBar user={session ? session.user || null : null} />
 					{children}
+					<Footer />
 				</div>
 			</body>
 		</html>

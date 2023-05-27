@@ -68,6 +68,7 @@ Make sure your next-auth configuration has this line
 
 ### How to put firebase secret key into vercel env var
 
+
 When deploy application into vercel, I encountered a weird error on `/api/auth/callback/todoist` route. 
 
 <details>
