@@ -3,6 +3,8 @@ import TodoistProvider from "next-auth/providers/todoist";
 import { FirestoreAdapter } from "@next-auth/firebase-adapter";
 import { cert } from "firebase-admin/app";
 
+const { privateKey } = JSON.parse(process.env.FIREBASE_PRIVATE_KEY || "{ privateKey: null }");
+
 export const authOptions: NextAuthOptions = {
 	providers: [
 		TodoistProvider({
@@ -30,7 +32,7 @@ export const authOptions: NextAuthOptions = {
 		credential: cert({
 			projectId: process.env.FIREBASE_PROJECT_ID,
 			clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-			privateKey: process.env.FIREBASE_PRIVATE_KEY,
+			privateKey: privateKey,
 		}),
 	}),
 };
