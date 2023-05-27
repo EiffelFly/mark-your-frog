@@ -107,7 +107,7 @@ When deploy application into vercel, I encountered a weird error on `/api/auth/c
       code: 2
     }
   ```
-<details/>
+</details>
 
 I begin to dig into how to solve this problem. I found that the problem is caused by the firebase secret key. I put the secret key into vercel env var, but it seems that the secret key is not correctly parsed.
 
