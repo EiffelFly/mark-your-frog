@@ -13,7 +13,7 @@ const publicProcedure = t.procedure;
 const router = t.router;
 
 const todoistRouter = router({
-	hello: publicProcedure.input(z.string().nullish()).query(({ input, ctx }) => {
+	hello: publicProcedure.input(z.string().nullish()).query(({ input }) => {
 		return `hello ${input ?? "world"}`;
 	}),
 	analyse: publicProcedure
@@ -26,12 +26,17 @@ const todoistRouter = router({
 		.query(async ({ input, ctx }) => {
 			try {
 				// fetch todoist api and use the filter=created before: -14 days
-				const fetchTasksRes = await fetch(`https://api.todoist.com/rest/v2/tasks`, {
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${input.accessToken}`,
-					},
-				});
+				const fetchTasksRes = await fetch(
+					`https://api.todoist.com/rest/v2/tasks?filter=${encodeURIComponent(
+						"created before: -30 days"
+					)}`,
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${input.accessToken}`,
+						},
+					}
+				);
 
 				const todoistTasks = (await fetchTasksRes.json()) as TodoistTodo[];
 
