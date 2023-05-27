@@ -42,6 +42,68 @@ INPUT: {todos}
 - Add functionality to spilt the frog into different tasks.
 - Calculate the time needed to finish the task and help people to plan their day.
 
+## How to run locally
+
+### Install all the deps
+
+At the root, run `pnpm i`
+
+### Register OAuth App at todoist
+
+Please follow the Todoist instruction [^3]
+
+### Register Firebase
+
+We are using firebase to store authentication user's info, if you do not want to user this functionality you can remove the firebase related code. at [apps/app/src/lib/auth.ts](./apps/app/src/lib/auth.ts). 
+
+- Open firebase project
+- Enable Firebase management API 
+- Download the service account secret, extract private key, client_email and project_id
+
+### Create .env.local file at `/apps/app`
+
+The structure should look like
+
+```
+TODOIST_ID=Todoist oauth client id
+TODOIST_SECRET=Todoist oauth client secret
+NEXTAUTH_SECRET=Next auth secret (randomly generate openssl string)
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+```
+
+### Run the app
+
+At [app](/apps/app/) run `pnpm dev`
+
+### Create .dev.vars file at [api](/packages/api/)
+
+```
+OPENAI_API_KEY=YOUR_OPEN_API_KEY
+```
+
+
+### Setup cloudflare worker
+
+- Register cloudflare account
+- Install cloudflare wrangler
+- Under [api](/packages/api/) run `pnpm dev`
+- Enter l to run worker locally
+
+
+```ts
+// Please remove this part
+  adapter: FirestoreAdapter({
+		credential: cert({
+			projectId: process.env.FIREBASE_PROJECT_ID,
+			clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+			privateKey: process.env.FIREBASE_PRIVATE_KEY,
+		}),
+	}),
+```
+
+
 ## Caveat
 
 ### TypeError: adapter is not a function
@@ -132,3 +194,4 @@ You need to copy this line and then directly paste into Vercel. Vercel will auto
 
 [^1]: [Todoist/Eat the frog](https://todoist.com/productivity-methods/eat-the-frog)
 [^2]: [Cloudflare worker Uncaught ReferenceError: FinalizationRegistry is not defined](https://github.com/dqbd/tiktoken/issues/46)
+[^3]: [Todoist Authorization guide](https://developer.todoist.com/guides/#authorization)
