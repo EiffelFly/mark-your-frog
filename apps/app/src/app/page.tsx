@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
 	title: "Mark Your Frog",
+	description:
+		"Mark your frog will retrieve your Todoist tasks and analyse them to find out what your frog is.",
 };
 
 export default async function Home() {
